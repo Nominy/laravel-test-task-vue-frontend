@@ -9,8 +9,25 @@ if (!API_KEY) {
   console.error('VITE_API_KEY is required but not set in environment variables')
 }
 
+// Handle mixed content issues for HTTPS contexts
+const getApiBaseUrl = () => {
+  const baseUrl = API_BASE_URL
+
+  // If we're in production (HTTPS) and the API is HTTP, try HTTPS
+  if (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    baseUrl.startsWith('http://')
+  ) {
+    console.warn('Converting HTTP API URL to HTTPS due to mixed content restrictions')
+    return baseUrl.replace('http://', 'https://')
+  }
+
+  return baseUrl
+}
+
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
 })
 

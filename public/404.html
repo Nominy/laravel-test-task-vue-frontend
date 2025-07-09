@@ -33,17 +33,32 @@
     <div id="app"></div>
     <!-- This script adds the redirect functionality -->
     <script type="text/javascript">
-      // Immediately redirect to index.html with the current path
-      window.location.replace(
-        window.location.origin +
-          window.location.pathname.split('/').slice(0, -1).join('/') +
-          '/index.html?/' +
-          window.location.pathname.slice(window.location.pathname.lastIndexOf('/') + 1) +
-          (window.location.search
-            ? '&' + window.location.search.slice(1).replace(/&/g, '~and~')
-            : '') +
-          window.location.hash,
-      )
+      // GitHub Pages SPA redirect
+      var pathSegmentsToKeep = 1 // Keep the repo name segment
+
+      var l = window.location
+      var pathname = l.pathname
+
+      // For GitHub Pages: /laravel-test-task-vue-frontend/stocks -> /laravel-test-task-vue-frontend/?/stocks
+      var pathArray = pathname.split('/').filter(function (segment) {
+        return segment !== ''
+      })
+
+      if (pathArray.length > pathSegmentsToKeep) {
+        var redirectPath =
+          '/' +
+          pathArray.slice(0, pathSegmentsToKeep).join('/') +
+          '/?/' +
+          pathArray.slice(pathSegmentsToKeep).join('/') +
+          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+          l.hash
+        window.location.replace(l.origin + redirectPath)
+      } else {
+        // If we're already at the root, just load index.html
+        window.location.replace(
+          l.origin + pathname + (pathname.endsWith('/') ? '' : '/') + 'index.html',
+        )
+      }
     </script>
   </body>
 </html>

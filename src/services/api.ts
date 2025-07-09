@@ -16,29 +16,31 @@ if (!API_KEY) {
   console.error('VITE_API_KEY is required but not set in environment variables')
 }
 
-// Handle mixed content issues for HTTPS contexts
+// Handle mixed content issues by using relative URLs in browser context
 const getApiBaseUrl = () => {
   const baseUrl = API_BASE_URL
 
-  console.log('🔍 Mixed content check:')
-  console.log('- Base URL:', baseUrl)
+  console.log('🔍 API URL processing:')
+  console.log('- Original API_BASE_URL:', baseUrl)
   console.log('- Is browser context:', typeof window !== 'undefined')
-  console.log('- Protocol:', typeof window !== 'undefined' ? window.location.protocol : 'N/A')
-  console.log('- Starts with http://:', baseUrl.startsWith('http://'))
 
-  // If we're in production (HTTPS) and the API is HTTP, try HTTPS
+  // In browser context, convert full URLs to protocol-relative or path-only
   if (
     typeof window !== 'undefined' &&
-    window.location.protocol === 'https:' &&
-    baseUrl.startsWith('http://')
+    (baseUrl.startsWith('http://') || baseUrl.startsWith('https://'))
   ) {
-    console.warn('🔄 Converting HTTP API URL to HTTPS due to mixed content restrictions')
-    const httpsUrl = baseUrl.replace('http://', 'https://')
-    console.log('- Converted URL:', httpsUrl)
-    return httpsUrl
+    try {
+      const url = new URL(baseUrl)
+      // Use protocol-relative URL (inherits current page's protocol)
+      const protocolRelativeUrl = `//${url.host}${url.pathname}`
+      console.log('🔄 Converting to protocol-relative URL:', protocolRelativeUrl)
+      return protocolRelativeUrl
+    } catch (error) {
+      console.warn('Failed to parse API URL, using as-is:', error)
+    }
   }
 
-  console.log('✅ No conversion needed')
+  console.log('✅ Using URL as-is')
   return baseUrl
 }
 

@@ -4,6 +4,13 @@ import type { ApiResponse, ApiFilters, Stock, Income, Sale, Order } from '../typ
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 const API_KEY = import.meta.env.VITE_API_KEY || ''
 
+// Debug environment variables
+console.log('🔍 API Debug Info:')
+console.log('- VITE_API_BASE_URL from env:', import.meta.env.VITE_API_BASE_URL)
+console.log('- API_BASE_URL final:', API_BASE_URL)
+console.log('- VITE_API_KEY from env:', import.meta.env.VITE_API_KEY ? '✅ Set' : '❌ Not set')
+console.log('- Current protocol:', typeof window !== 'undefined' ? window.location.protocol : 'SSR')
+
 // Validate required environment variables
 if (!API_KEY) {
   console.error('VITE_API_KEY is required but not set in environment variables')
@@ -13,16 +20,25 @@ if (!API_KEY) {
 const getApiBaseUrl = () => {
   const baseUrl = API_BASE_URL
 
+  console.log('🔍 Mixed content check:')
+  console.log('- Base URL:', baseUrl)
+  console.log('- Is browser context:', typeof window !== 'undefined')
+  console.log('- Protocol:', typeof window !== 'undefined' ? window.location.protocol : 'N/A')
+  console.log('- Starts with http://:', baseUrl.startsWith('http://'))
+
   // If we're in production (HTTPS) and the API is HTTP, try HTTPS
   if (
     typeof window !== 'undefined' &&
     window.location.protocol === 'https:' &&
     baseUrl.startsWith('http://')
   ) {
-    console.warn('Converting HTTP API URL to HTTPS due to mixed content restrictions')
-    return baseUrl.replace('http://', 'https://')
+    console.warn('🔄 Converting HTTP API URL to HTTPS due to mixed content restrictions')
+    const httpsUrl = baseUrl.replace('http://', 'https://')
+    console.log('- Converted URL:', httpsUrl)
+    return httpsUrl
   }
 
+  console.log('✅ No conversion needed')
   return baseUrl
 }
 
